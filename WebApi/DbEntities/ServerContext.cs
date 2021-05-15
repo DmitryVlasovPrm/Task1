@@ -1,6 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
+﻿using Microsoft.EntityFrameworkCore;
 
 #nullable disable
 
@@ -8,14 +6,16 @@ namespace WebApi
 {
     public partial class ServerContext : DbContext
     {
-        public ServerContext()
+        private readonly string _connectionString;
+
+        public ServerContext(string connectionString)
         {
+            _connectionString = connectionString;
         }
 
         public ServerContext(DbContextOptions<ServerContext> options)
             : base(options)
-        {
-        }
+        { }
 
         public virtual DbSet<User> Users { get; set; }
         public virtual DbSet<UserGroup> UserGroups { get; set; }
@@ -25,8 +25,7 @@ namespace WebApi
         {
             if (!optionsBuilder.IsConfigured)
             {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseSqlServer("Server=(localdb)\\MSSQLLocalDB;Database=Server;Trusted_Connection=True;");
+                optionsBuilder.UseSqlServer(_connectionString);
             }
         }
 
@@ -38,10 +37,12 @@ namespace WebApi
             {
                 entity.ToTable("User");
 
-                entity.HasIndex(e => e.Login, "UQ__User__5E55825B4789F8C4")
+                entity.HasIndex(e => e.Login, "UQ__User__5E55825B09A1314E")
                     .IsUnique();
 
-                entity.Property(e => e.CreatedDate).HasColumnType("date");
+                entity.Property(e => e.CreatedDate)
+                    .HasColumnType("date")
+                    .HasDefaultValueSql("(getdate())");
 
                 entity.Property(e => e.Login)
                     .IsRequired()
@@ -56,19 +57,20 @@ namespace WebApi
                 entity.HasOne(d => d.UserGroup)
                     .WithMany(p => p.Users)
                     .HasForeignKey(d => d.UserGroupId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__User__UserGroupI__29572725");
+                    .HasConstraintName("FK__User__UserGroupI__71D1E811");
 
                 entity.HasOne(d => d.UserState)
                     .WithMany(p => p.Users)
                     .HasForeignKey(d => d.UserStateId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__User__UserStateI__2A4B4B5E");
+                    .HasConstraintName("FK__User__UserStateI__72C60C4A");
             });
 
             modelBuilder.Entity<UserGroup>(entity =>
             {
                 entity.ToTable("UserGroup");
+
+                entity.HasIndex(e => e.Code, "UQ__UserGrou__A25C5AA7B46393DE")
+                    .IsUnique();
 
                 entity.Property(e => e.UserGroupId).ValueGeneratedNever();
 
@@ -85,6 +87,9 @@ namespace WebApi
             modelBuilder.Entity<UserState>(entity =>
             {
                 entity.ToTable("UserState");
+
+                entity.HasIndex(e => e.Code, "UQ__UserStat__A25C5AA77C1C2918")
+                    .IsUnique();
 
                 entity.Property(e => e.UserStateId).ValueGeneratedNever();
 

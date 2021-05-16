@@ -12,7 +12,7 @@ namespace WebApi
         // Ключ шифрования
         public const string KEY = "32892A11-99C7-4C78-8827-D00B031D52C1";
         // Время жизни токена
-        public const int LIFETIME = 1;
+        public const int LIFETIME = 5;
 
         public static SymmetricSecurityKey GetSymmetricSecurityKey()
         {

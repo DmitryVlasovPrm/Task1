@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using System.Threading.Tasks;
+using WebApi;
 
 namespace WebApi.Controllers
 {
@@ -46,36 +47,39 @@ namespace WebApi.Controllers
             if (newUser == null)
                 return BadRequest();
 
-            if (newUser.UserGroupId == 1)
-            {
-                var admin = await _dbContext.Users.FirstOrDefaultAsync(x => x.UserGroupId == 1 && x.UserStateId != 2);
-                if (admin != null)
-                    return BadRequest(new { errorText = "Administrator already exists" });
-            }
+            // Проверка логинов, которые регистрируются в данный момент
+            var newLogin = newUser.Login;
+            if (Program.LoginsInProcess.Contains(newLogin))
+                return BadRequest(new { errorText = "This user login already exists" });
+            else
+                Program.LoginsInProcess.Add(newLogin);
+            await Task.Delay(5000);
 
+            // Занят ли текущий login
             var existUser = await _dbContext.Users.FirstOrDefaultAsync(x => x.Login == newUser.Login);
             if (existUser != null)
             {
                 // Если такой пользователь существует
                 if (existUser.UserStateId != 2)
                 {
+                    Program.LoginsInProcess.Remove(newLogin);
                     return BadRequest(new { errorText = "This user login already exists" });
                 }
                 // Если такой был удален, то можем создать нового с таким же login
                 else
                 {
                     existUser.Password = newUser.Password;
-                    existUser.UserGroupId = newUser.UserGroupId;
                     existUser.UserStateId = 1;
                 }
             }
             else
-			{
+            {
+                // Такого пользователя нет
                 _dbContext.Users.Add(NewUser.ToUser(newUser));
             }
 
             await _dbContext.SaveChangesAsync();
-            await Task.Delay(5000);
+            Program.LoginsInProcess.Remove(newLogin);
             return Ok();
         }
 
@@ -88,7 +92,13 @@ namespace WebApi.Controllers
             if (user == null)
                 return NotFound();
 
-            user.UserStateId = 2; // Blocked
+            if (user.UserGroupId == 1)
+                // Администратор не может удалить сам себя
+                return BadRequest(new { errorText = "Administrator can't be blocked" });
+            else
+                // Blocked
+                user.UserStateId = 2;
+
             await _dbContext.SaveChangesAsync();
             return Ok();
         }

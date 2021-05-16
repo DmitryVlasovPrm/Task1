@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using System.Threading.Tasks;
 
 namespace WebApi.Controllers
@@ -38,6 +39,7 @@ namespace WebApi.Controllers
         }
 
         // POST api/users
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<ActionResult<User>> Post(NewUser newUser)
         {
@@ -48,26 +50,37 @@ namespace WebApi.Controllers
             {
                 var admin = await _dbContext.Users.FirstOrDefaultAsync(x => x.UserGroupId == 1 && x.UserStateId != 2);
                 if (admin != null)
-                    ModelState.AddModelError("UserGroupId", "Administrator already exists");
+                    return BadRequest(new { errorText = "Administrator already exists" });
             }
 
             var existUser = await _dbContext.Users.FirstOrDefaultAsync(x => x.Login == newUser.Login);
             if (existUser != null)
-                ModelState.AddModelError("Login", "This user login already exists");
+            {
+                // Если такой пользователь существует
+                if (existUser.UserStateId != 2)
+                {
+                    return BadRequest(new { errorText = "This user login already exists" });
+                }
+                // Если такой был удален, то можем создать нового с таким же login
+                else
+                {
+                    existUser.Password = newUser.Password;
+                    existUser.UserGroupId = newUser.UserGroupId;
+                    existUser.UserStateId = 1;
+                }
+            }
+            else
+			{
+                _dbContext.Users.Add(NewUser.ToUser(newUser));
+            }
 
-            // Если есть ошибки
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var user = NewUser.ToUser(newUser);
-            _dbContext.Users.Add(user);
             await _dbContext.SaveChangesAsync();
             await Task.Delay(5000);
-
             return Ok();
         }
 
         // DELETE api/users/{id}
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)
         {

@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System;
 
 namespace WebApi
 {
@@ -41,7 +42,7 @@ namespace WebApi
 					Scheme = "bearer",
 					Description = "Specify the authorization token.",
 					In = ParameterLocation.Header,
-					Type = SecuritySchemeType.Http,
+					Type = SecuritySchemeType.Http
 				};
 				c.AddSecurityDefinition("jwt_auth", securityDefinition);
 
@@ -78,6 +79,7 @@ namespace WebApi
 
 						// Валидация времени существования
 						ValidateLifetime = true,
+						ClockSkew = TimeSpan.Zero,
 
 						// Валидация ключа безопасности
 						ValidateIssuerSigningKey = true,

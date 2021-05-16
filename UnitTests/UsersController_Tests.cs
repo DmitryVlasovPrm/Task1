@@ -22,7 +22,7 @@ namespace UnitTests
 		}
 
 		[Fact]
-		public async void GetAllUsers()
+		public async void GetExistentUser()
 		{
 			// Arrange
 			var dbContext = new ServerContext(connString);

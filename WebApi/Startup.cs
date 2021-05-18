@@ -23,19 +23,16 @@ namespace WebApi
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
-			// Устанавливаем контекст данных
 			services.AddDbContext<ServerContext>(options =>
 				options.UseSqlServer(Configuration.GetConnectionString("ServerDatabase")));
-			// Задействуем контроллеры
 			services.AddControllers();
 
-			// Генератор Swagger
 			services.AddSwaggerGen(c =>
 			{
 				c.SwaggerDoc("v1", new OpenApiInfo { Title = "Server", Version = "v1" });
 
 				// Bearer token authentication
-				OpenApiSecurityScheme securityDefinition = new OpenApiSecurityScheme()
+				var securityDefinition = new OpenApiSecurityScheme()
 				{
 					Name = "Bearer",
 					BearerFormat = "JWT",
@@ -47,7 +44,7 @@ namespace WebApi
 				c.AddSecurityDefinition("jwt_auth", securityDefinition);
 
 				// Make sure swagger UI requires a Bearer token specified
-				OpenApiSecurityScheme securityScheme = new OpenApiSecurityScheme()
+				var securityScheme = new OpenApiSecurityScheme()
 				{
 					Reference = new OpenApiReference()
 					{
@@ -55,33 +52,28 @@ namespace WebApi
 						Type = ReferenceType.SecurityScheme
 					}
 				};
-				OpenApiSecurityRequirement securityRequirements = new OpenApiSecurityRequirement()
+				var securityRequirements = new OpenApiSecurityRequirement()
 				{
 					{ securityScheme, new string[] { } }
 				};
 				c.AddSecurityRequirement(securityRequirements);
 			});
 
-			// Встраиваем функциональность JWT-токенов
 			services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 				.AddJwtBearer(options =>
 				{
 					options.RequireHttpsMetadata = false;
 					options.TokenValidationParameters = new TokenValidationParameters
 					{
-						// Валидация издателя
 						ValidateIssuer = true,
 						ValidIssuer = AuthOptions.ISSUER,
 
-						// Валидация потребителя
 						ValidateAudience = true,
 						ValidAudience = AuthOptions.AUDIENCE,
 
-						// Валидация времени существования
 						ValidateLifetime = true,
 						ClockSkew = TimeSpan.Zero,
 
-						// Валидация ключа безопасности
 						ValidateIssuerSigningKey = true,
 						IssuerSigningKey = AuthOptions.GetSymmetricSecurityKey(),
 					};
@@ -91,11 +83,14 @@ namespace WebApi
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
 		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 		{
-			// Enable middleware to serve generated Swagger as a JSON endpoint.
+			using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
+			{
+				var context = serviceScope.ServiceProvider.GetRequiredService<ServerContext>();
+				context.Database.Migrate();
+			}
+
 			app.UseSwagger();
 
-			// Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.),
-			// specifying the Swagger JSON endpoint.
 			app.UseSwaggerUI(c =>
 			{
 				c.SwaggerEndpoint("/swagger/v1/swagger.json", "Server");
@@ -115,7 +110,6 @@ namespace WebApi
 
 			app.UseEndpoints(endpoints =>
 			{
-				// Маршрутизация на контроллеры
 				endpoints.MapControllers();
 			});
 		}

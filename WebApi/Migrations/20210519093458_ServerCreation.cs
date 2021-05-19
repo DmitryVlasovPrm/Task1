@@ -49,13 +49,13 @@ namespace WebApi.Migrations
                 {
                     table.PrimaryKey("PK_User", x => x.UserId);
                     table.ForeignKey(
-                        name: "FK__User__UserGroupI__71D1E811",
+                        name: "FK__User__UserGroupI__2C3393D0",
                         column: x => x.UserGroupId,
                         principalTable: "UserGroup",
                         principalColumn: "UserGroupId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK__User__UserStateI__72C60C4A",
+                        name: "FK__User__UserStateI__2D27B809",
                         column: x => x.UserStateId,
                         principalTable: "UserState",
                         principalColumn: "UserStateId",
@@ -73,22 +73,52 @@ namespace WebApi.Migrations
                 column: "UserStateId");
 
             migrationBuilder.CreateIndex(
-                name: "UQ__User__5E55825B09A1314E",
+                name: "UQ__User__5E55825BB7FEDABC",
                 table: "User",
                 column: "Login",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "UQ__UserGrou__A25C5AA7B46393DE",
+                name: "UQ__UserGrou__A25C5AA7D3528F23",
                 table: "UserGroup",
                 column: "Code",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "UQ__UserStat__A25C5AA77C1C2918",
+                name: "UQ__UserStat__A25C5AA7E06D2D0B",
                 table: "UserState",
                 column: "Code",
                 unique: true);
+
+            var columns = new[] { "UserGroupId", "Code", "Description" };
+            migrationBuilder.InsertData(
+                table: "UserGroup",
+                columns: columns,
+                values: new object[] { 1, "Admin", "Administartor" });
+            migrationBuilder.InsertData(
+                table: "UserGroup",
+                columns: columns,
+                values: new object[] { 2, "User", "Regular user" });
+
+            columns = new[] { "UserStateId", "Code", "Description" };
+            migrationBuilder.InsertData(
+                table: "UserState",
+                columns: columns,
+                values: new object[] { 1, "Active", "Registered user" });
+            migrationBuilder.InsertData(
+                table: "UserState",
+                columns: columns,
+                values: new object[] { 2, "Blocked", "Deleted user" });
+
+            columns = new[] { "Login", "Password", "UserGroupId", "UserStateId" };
+            migrationBuilder.InsertData(
+                table: "User",
+                columns: columns,
+                values: new object[] { "dmitry", "12345678", 1, 1 });
+            migrationBuilder.InsertData(
+                table: "User",
+                columns: columns,
+                values: new object[] { "sergey", "12345678", 2, 1 });
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

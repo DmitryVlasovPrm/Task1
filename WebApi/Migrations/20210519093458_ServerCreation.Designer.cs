@@ -10,7 +10,7 @@ using WebApi;
 namespace WebApi.Migrations
 {
     [DbContext(typeof(ServerContext))]
-    [Migration("20210518200302_ServerCreation")]
+    [Migration("20210519093458_ServerCreation")]
     partial class ServerCreation
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -58,7 +58,7 @@ namespace WebApi.Migrations
 
                     b.HasIndex("UserStateId");
 
-                    b.HasIndex(new[] { "Login" }, "UQ__User__5E55825B09A1314E")
+                    b.HasIndex(new[] { "Login" }, "UQ__User__5E55825BB7FEDABC")
                         .IsUnique();
 
                     b.ToTable("User");
@@ -82,7 +82,7 @@ namespace WebApi.Migrations
 
                     b.HasKey("UserGroupId");
 
-                    b.HasIndex(new[] { "Code" }, "UQ__UserGrou__A25C5AA7B46393DE")
+                    b.HasIndex(new[] { "Code" }, "UQ__UserGrou__A25C5AA7D3528F23")
                         .IsUnique();
 
                     b.ToTable("UserGroup");
@@ -106,7 +106,7 @@ namespace WebApi.Migrations
 
                     b.HasKey("UserStateId");
 
-                    b.HasIndex(new[] { "Code" }, "UQ__UserStat__A25C5AA77C1C2918")
+                    b.HasIndex(new[] { "Code" }, "UQ__UserStat__A25C5AA7E06D2D0B")
                         .IsUnique();
 
                     b.ToTable("UserState");
@@ -117,14 +117,14 @@ namespace WebApi.Migrations
                     b.HasOne("WebApi.UserGroup", "UserGroup")
                         .WithMany("Users")
                         .HasForeignKey("UserGroupId")
-                        .HasConstraintName("FK__User__UserGroupI__71D1E811")
+                        .HasConstraintName("FK__User__UserGroupI__2C3393D0")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("WebApi.UserState", "UserState")
                         .WithMany("Users")
                         .HasForeignKey("UserStateId")
-                        .HasConstraintName("FK__User__UserStateI__72C60C4A")
+                        .HasConstraintName("FK__User__UserStateI__2D27B809")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

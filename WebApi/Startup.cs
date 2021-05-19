@@ -85,8 +85,15 @@ namespace WebApi
 		{
 			using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
 			{
-				var context = serviceScope.ServiceProvider.GetRequiredService<ServerContext>();
-				context.Database.Migrate();
+				try
+				{
+					var context = serviceScope.ServiceProvider.GetRequiredService<ServerContext>();
+					context.Database.Migrate();
+				}
+				catch (Exception ex)
+				{
+					Console.WriteLine($"Migration error: {ex.Message}");
+				}
 			}
 
 			app.UseSwagger();

@@ -37,7 +37,7 @@ namespace WebApi
             {
                 entity.ToTable("User");
 
-                entity.HasIndex(e => e.Login, "UQ__User__5E55825B09A1314E")
+                entity.HasIndex(e => e.Login, "UQ__User__5E55825BB7FEDABC")
                     .IsUnique();
 
                 entity.Property(e => e.CreatedDate)
@@ -57,19 +57,19 @@ namespace WebApi
                 entity.HasOne(d => d.UserGroup)
                     .WithMany(p => p.Users)
                     .HasForeignKey(d => d.UserGroupId)
-                    .HasConstraintName("FK__User__UserGroupI__71D1E811");
+                    .HasConstraintName("FK__User__UserGroupI__2C3393D0");
 
                 entity.HasOne(d => d.UserState)
                     .WithMany(p => p.Users)
                     .HasForeignKey(d => d.UserStateId)
-                    .HasConstraintName("FK__User__UserStateI__72C60C4A");
+                    .HasConstraintName("FK__User__UserStateI__2D27B809");
             });
 
             modelBuilder.Entity<UserGroup>(entity =>
             {
                 entity.ToTable("UserGroup");
 
-                entity.HasIndex(e => e.Code, "UQ__UserGrou__A25C5AA7B46393DE")
+                entity.HasIndex(e => e.Code, "UQ__UserGrou__A25C5AA7D3528F23")
                     .IsUnique();
 
                 entity.Property(e => e.UserGroupId).ValueGeneratedNever();
@@ -88,7 +88,7 @@ namespace WebApi
             {
                 entity.ToTable("UserState");
 
-                entity.HasIndex(e => e.Code, "UQ__UserStat__A25C5AA77C1C2918")
+                entity.HasIndex(e => e.Code, "UQ__UserStat__A25C5AA7E06D2D0B")
                     .IsUnique();
 
                 entity.Property(e => e.UserStateId).ValueGeneratedNever();
